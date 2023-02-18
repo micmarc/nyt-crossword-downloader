@@ -42,7 +42,7 @@ def download(puzzle_type: str, pub_year: int = 2023):
         return
 
     # Set the output directory for the puzzle files.
-    out_dir = f'out/{puzzle_type}'
+    out_dir = f'out/{puzzle_type}/{pub_year}'
     # Create the directory if it does not already exist.
     Path(out_dir).mkdir(parents=True, exist_ok=True)
 
@@ -58,29 +58,35 @@ def download(puzzle_type: str, pub_year: int = 2023):
             # Append solution suffix if the solution file is desired
             suffix = '.ans' if solution else ''
 
+            # The file on the server
+            source_file_name = f'{file_name}{suffix}'
+            # The file to save - include the title for convenience
+            title = result['title']
+            dest_file_name = f'{title}.{source_file_name}'
+
             # Download the puzzle file.
             # It should be small enough to fit into memory, so we do not have to stream to disk.
-            puzzle = session.get(puzzle_print_url_format % f'{file_name}{suffix}')
+            puzzle = session.get(puzzle_print_url_format % source_file_name)
             if puzzle.status_code != 200:
                 if solution:
                     # Fall back to using the puzzle ID if download fails.
                     # This can happen if the puzzle solution has not been published in the paper yet.
+                    puzzle_id = result['puzzle_id']
                     puzzle = session.get(puzzle_url_format % f'{puzzle_id}{suffix}')
                     if puzzle.status_code != 200:
-                        print(f'The solution for {file_name} is not yet available')
+                        print(f'The solution for {dest_file_name} is not yet available')
                         return
                 else:
-                    print(f'Error downloading {file_name}: {str(puzzle.content).strip()}')
+                    print(f'Error downloading {dest_file_name}: {str(puzzle.content).strip()}')
                     return
 
             # Save the downloaded file to disk.
-            dest_path = f'{out_dir}/{file_name}{suffix}.pdf'
+            dest_path = f'{out_dir}/{dest_file_name}.pdf'
             print(f'Saving {dest_path}')
             with open(dest_path, 'wb') as f:
                 f.write(puzzle.content)
 
         for result in response['results']:
-            puzzle_id = result['puzzle_id']
             publish_type = result['publish_type']
             # The download URL includes the formatted file date and optional suffix in the file name.
             file_date = date.fromisoformat(result['print_date']).strftime(file_date_format)

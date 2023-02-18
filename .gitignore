@@ -130,3 +130,7 @@ dmypy.json
 
 # PyCharm
 .idea/
+
+# Project-specific
+cookies.txt
+out/

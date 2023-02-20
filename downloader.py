@@ -72,20 +72,21 @@ def download(puzzle_type: str, pub_year: int = 2023):
                 print(f'Puzzle already downloaded: "{dest_path}"')
                 return
 
-            # Download the puzzle file.
+            # Download the puzzle file (newspaper version).
             # It should be small enough to fit into memory, so we do not have to stream to disk.
             puzzle = session.get(puzzle_print_url_format % source_file_name)
             if puzzle.status_code != 200:
-                if solution:
-                    # Fall back to using the puzzle ID if download fails.
-                    # This can happen if the puzzle solution has not been published in the paper yet.
-                    puzzle_id = result['puzzle_id']
-                    puzzle = session.get(puzzle_url_format % f'{puzzle_id}{suffix}')
-                    if puzzle.status_code != 200:
-                        print(f'The solution for "{title}.{file_date}" is not yet available')
-                        return
-                else:
-                    print(f'Error downloading "{dest_file_name}": {str(puzzle.content).strip()}')
+                # Fall back to using the puzzle ID if download fails.
+                # This is useful for older puzzles or solutions that have not been published in the paper yet.
+                puzzle_id = result['puzzle_id']
+                puzzle = session.get(puzzle_url_format % f'{puzzle_id}{suffix}')
+                if puzzle.status_code != 200:
+                    try:
+                        error_text = puzzle.json()['errors'][0]
+                    except ValueError:
+                        # Response is not JSON, probably just plain text
+                        error_text = puzzle.content.decode('utf8')
+                    print(f'Error downloading "{dest_file_name}": {error_text}')
                     return
 
             # Save the downloaded file to disk.

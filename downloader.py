@@ -1,7 +1,9 @@
+import os
 from datetime import date
 from http.cookiejar import MozillaCookieJar
 from pathlib import Path
 
+import filedate
 import requests
 
 puzzles_endpoint = 'https://edge.games.nyti.nyt.net/svc/crosswords/v3/35806626/puzzles.json'
@@ -54,20 +56,20 @@ def download(puzzle_type: str, pub_year: int = 2023):
         cookies.load()
         session.cookies = cookies
 
-        def download_file(file_name: str, solution=False):
+        def download_file(solution=False):
             # Append solution suffix if the solution file is desired
             suffix = '.ans' if solution else ''
 
             # The file on the server
-            source_file_name = f'{file_name}{suffix}'
+            source_file_name = f'{file_name_base}{suffix}'
             # The file to save - include the title for convenience
             title = result['title']
-            dest_file_name = f'{title}.{source_file_name}'
+            dest_file_name = f'{title}.{file_date}{suffix}'
 
             # Do not download if the file already exists
             dest_path = f'{out_dir}/{dest_file_name}.pdf'
             if Path(dest_path).exists():
-                print(f'Puzzle already downloaded: {dest_path}')
+                print(f'Puzzle already downloaded: "{dest_path}"')
                 return
 
             # Download the puzzle file.
@@ -80,23 +82,28 @@ def download(puzzle_type: str, pub_year: int = 2023):
                     puzzle_id = result['puzzle_id']
                     puzzle = session.get(puzzle_url_format % f'{puzzle_id}{suffix}')
                     if puzzle.status_code != 200:
-                        print(f'The solution for {dest_file_name} is not yet available')
+                        print(f'The solution for "{title}.{file_date}" is not yet available')
                         return
                 else:
-                    print(f'Error downloading {dest_file_name}: {str(puzzle.content).strip()}')
+                    print(f'Error downloading "{dest_file_name}": {str(puzzle.content).strip()}')
                     return
 
             # Save the downloaded file to disk.
-            print(f'Saving {dest_path}')
-            with open(dest_path, 'wb') as f:
-                f.write(puzzle.content)
+            print(f'Saving "{dest_path}"')
+            Path(dest_path).write_bytes(puzzle.content)
+
+            # Update created and last modified dates to reflect the publish date.
+            # This enables sorting the files by publish date if desired.
+            file_meta = filedate.File(dest_path)
+            file_meta.set(created=print_date, modified=print_date)
 
         for result in response['results']:
             publish_type = result['publish_type']
             # The download URL includes the formatted file date and optional suffix in the file name.
-            file_date = date.fromisoformat(result['print_date']).strftime(file_date_format)
+            print_date = result['print_date']
+            file_date = date.fromisoformat(print_date).strftime(file_date_format)
             file_name_base = f'{file_date}{publish_type_suffix[publish_type]}'
             # Download the puzzle file
-            download_file(f'{file_name_base}')
+            download_file()
             # Download the solution file
-            download_file(f'{file_name_base}', solution=True)
+            download_file(solution=True)

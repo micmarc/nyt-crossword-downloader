@@ -64,6 +64,12 @@ def download(puzzle_type: str, pub_year: int = 2023):
             title = result['title']
             dest_file_name = f'{title}.{source_file_name}'
 
+            # Do not download if the file already exists
+            dest_path = f'{out_dir}/{dest_file_name}.pdf'
+            if Path(dest_path).exists():
+                print(f'Puzzle already downloaded: {dest_path}')
+                return
+
             # Download the puzzle file.
             # It should be small enough to fit into memory, so we do not have to stream to disk.
             puzzle = session.get(puzzle_print_url_format % source_file_name)
@@ -81,7 +87,6 @@ def download(puzzle_type: str, pub_year: int = 2023):
                     return
 
             # Save the downloaded file to disk.
-            dest_path = f'{out_dir}/{dest_file_name}.pdf'
             print(f'Saving {dest_path}')
             with open(dest_path, 'wb') as f:
                 f.write(puzzle.content)

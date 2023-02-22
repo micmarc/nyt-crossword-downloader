@@ -98,7 +98,13 @@ def download(puzzle_type: str, pub_year: int = 2023):
             file_meta = filedate.File(dest_path)
             file_meta.set(created=print_date, modified=print_date)
 
-        for result in response['results']:
+        results = response['results']
+        if not results:
+            print(f'No {puzzle_type} puzzles were published in {pub_year}.')
+            return
+
+        print(f'Found {len(results)} {puzzle_type} puzzles published in {pub_year}. Downloading...')
+        for result in results:
             publish_type = result['publish_type']
             # The download URL includes the formatted file date and optional suffix in the file name.
             print_date = result['print_date']
@@ -108,3 +114,5 @@ def download(puzzle_type: str, pub_year: int = 2023):
             download_file()
             # Download the solution file
             download_file(solution=True)
+
+        print('All done!')

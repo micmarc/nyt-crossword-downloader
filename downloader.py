@@ -21,7 +21,7 @@ publish_type_suffix = {
 }
 
 
-def download(puzzle_type: str, pub_year: int = 2023):
+def download(puzzle_type: str, pub_year: int = 2023, cookies_path: str = 'cookies.txt'):
     # Set default query parameters for all puzzle types.
     # For Acrostic and Variety puzzles, we can call the API a year at a time without hitting any limits.
     params = {
@@ -41,7 +41,7 @@ def download(puzzle_type: str, pub_year: int = 2023):
         params['publish_type'] = 'variety,assorted'
     else:
         print(f'Invalid puzzle type: {puzzle_type}')
-        return
+        return False
 
     # Set the output directory for the puzzle files.
     out_dir = f'out/{puzzle_type}/{pub_year}'
@@ -52,7 +52,11 @@ def download(puzzle_type: str, pub_year: int = 2023):
 
     with requests.Session() as session:
         # Load cookies from cookies.txt, which is presumed to be in the Netscape format.
-        cookies = MozillaCookieJar('cookies.txt')
+        if not Path(cookies_path).exists():
+            print(f'ERROR: Could not find cookies file "{cookies_path}". Did you forget to export your cookies?')
+            return False
+
+        cookies = MozillaCookieJar(cookies_path)
         cookies.load()
         session.cookies = cookies
 
@@ -101,7 +105,7 @@ def download(puzzle_type: str, pub_year: int = 2023):
         results = response['results']
         if not results:
             print(f'No {puzzle_type} puzzles were published in {pub_year}.')
-            return
+            return True
 
         print(f'Found {len(results)} {puzzle_type} puzzles published in {pub_year}. Downloading...')
         for result in results:
@@ -116,3 +120,4 @@ def download(puzzle_type: str, pub_year: int = 2023):
             download_file(solution=True)
 
         print('All done!')
+        return True

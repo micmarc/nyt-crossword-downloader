@@ -15,4 +15,5 @@ if __name__ == '__main__':
         print('ERROR: Invalid year!')
         exit(1)
 
-    download(puzzle_type=puzzle_type, pub_year=year)
+    success = download(puzzle_type=puzzle_type, pub_year=year)
+    exit(0 if success else 1)

@@ -1,4 +1,3 @@
-import os
 from datetime import date
 from http.cookiejar import MozillaCookieJar
 from pathlib import Path
@@ -67,13 +66,20 @@ def download(puzzle_type: str, pub_year: int = 2023, cookies_path: str = 'cookie
             # The file on the server
             source_file_name = f'{file_name_base}{suffix}'
             # The file to save - include the title for convenience
-            title = result['title']
+            title: str = result['title']
+            # No title for a variety puzzle indicates no puzzle to download
+            if puzzle_type == 'variety' and not title:
+                print(f'Skipping variety puzzle "{source_file_name}" because it has no title')
+                return
+
+            # Replace path separator characters to avoid path issues.
+            title = title.replace('/', '-').replace('\\', '_')
             dest_file_name = f'{title}.{file_date}{suffix}'
 
             # Do not download if the file already exists
             dest_path = f'{out_dir}/{dest_file_name}.pdf'
             if Path(dest_path).exists():
-                print(f'Puzzle already downloaded: "{dest_path}"')
+                print(f'Puzzle "{source_file_name}" already downloaded: "{dest_path}"')
                 return
 
             # Download the puzzle file (newspaper version).
@@ -90,11 +96,11 @@ def download(puzzle_type: str, pub_year: int = 2023, cookies_path: str = 'cookie
                     except ValueError:
                         # Response is not JSON, probably just plain text
                         error_text = puzzle.content.decode('utf8')
-                    print(f'Error downloading "{dest_file_name}": {error_text}')
+                    print(f'Error downloading "{source_file_name}" to "{dest_file_name}": {error_text}')
                     return
 
             # Save the downloaded file to disk.
-            print(f'Saving "{dest_path}"')
+            print(f'Saving "{source_file_name}" as "{dest_path}"')
             Path(dest_path).write_bytes(puzzle.content)
 
             # Update created and last modified dates to reflect the publish date.
@@ -119,5 +125,4 @@ def download(puzzle_type: str, pub_year: int = 2023, cookies_path: str = 'cookie
             # Download the solution file
             download_file(solution=True)
 
-        print('All done!')
         return True

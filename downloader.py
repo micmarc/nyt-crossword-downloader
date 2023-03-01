@@ -43,7 +43,7 @@ def download(puzzle_type: str, pub_year: int = 2023, cookies_path: str = 'cookie
         return False
 
     # Set the output directory for the puzzle files.
-    out_dir = f'out/{puzzle_type}/{pub_year}'
+    out_dir = f'out/{puzzle_type.capitalize()}/{pub_year}'
     # Create the directory if it does not already exist.
     Path(out_dir).mkdir(parents=True, exist_ok=True)
 

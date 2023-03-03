@@ -19,6 +19,9 @@ publish_type_suffix = {
     'Assorted': '.3'  # Includes "A Little Variety" puzzles (e.g. "Jan0123.3.pdf")
 }
 
+# Global cookie jar (lazy-loaded)
+cookies = None
+
 
 def download(puzzle_type: str, pub_year: int = 2023, cookies_path: str = 'cookies.txt'):
     # Set default query parameters for all puzzle types.
@@ -55,8 +58,12 @@ def download(puzzle_type: str, pub_year: int = 2023, cookies_path: str = 'cookie
             print(f'ERROR: Could not find cookies file "{cookies_path}". Did you forget to export your cookies?')
             return False
 
-        cookies = MozillaCookieJar(cookies_path)
-        cookies.load()
+        global cookies
+        if not cookies:
+            print(f'Loading cookies from "{cookies_path}"...', end=" ")
+            cookies = MozillaCookieJar(cookies_path)
+            cookies.load()
+            print('done.')
         session.cookies = cookies
 
         def download_file(solution=False):
@@ -76,10 +83,14 @@ def download(puzzle_type: str, pub_year: int = 2023, cookies_path: str = 'cookie
             title = title.replace('/', '-').replace('\\', '_')
             dest_file_name = f'{title}.{file_date}{suffix}'
 
-            # Do not download if the file already exists
             dest_path = f'{out_dir}/{dest_file_name}.pdf'
+
+            # Total possible length of source_file_name (with .ans) is 13 characters
+            print(f'* {source_file_name:13} =>', end=" ")
+
+            # Do not download if the file already exists
             if Path(dest_path).exists():
-                print(f'Puzzle "{source_file_name}" already downloaded: "{dest_path}"')
+                print(f'{dest_path} (already downloaded)')
                 return
 
             # Download the puzzle file (newspaper version).
@@ -96,11 +107,11 @@ def download(puzzle_type: str, pub_year: int = 2023, cookies_path: str = 'cookie
                     except ValueError:
                         # Response is not JSON, probably just plain text
                         error_text = puzzle.content.decode('utf8')
-                    print(f'Error downloading "{source_file_name}" to "{dest_file_name}": {error_text}')
+                    print(f'ERROR! {error_text}')
                     return
 
             # Save the downloaded file to disk.
-            print(f'Saving "{source_file_name}" as "{dest_path}"')
+            print(dest_path)
             Path(dest_path).write_bytes(puzzle.content)
 
             # Update created and last modified dates to reflect the publish date.

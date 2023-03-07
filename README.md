@@ -16,7 +16,7 @@ Install dependencies:
 pipenv install
 ```
 
-Log into your NYT account and save your nytimes.com cookies to `cookies.txt` (I suggest [Get cookies.txt][Get cookies.txt] for Chrome).
+Log into your NYT account and save your nytimes.com cookies to `cookies.txt` (I suggest [Get cookies.txt LOCALLY][get-cookies] for Chrome).
 
 Run it:
 ```shell
@@ -74,4 +74,4 @@ All done!
 
 As of March 1, 2023, the Times is [no longer publishing Acrostics and Variety puzzles online](https://twitter.com/NYTGames/status/1630923424552894464). But the PDFs are still available (at least for now) if you know where to look, and PDFs are better than nothing!
 
-[Get cookies.txt]: https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid
+[get-cookies]: https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc

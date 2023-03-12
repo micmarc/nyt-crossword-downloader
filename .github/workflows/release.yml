@@ -1,11 +1,9 @@
 name: Release
 
 on:
-  pull_request:
-    branches: [ main ]
-#  push:
-#    tags:
-#      - '*'
+  push:
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -34,7 +32,7 @@ jobs:
         pipenv install --deploy --dev     
     - name: Create Install Package
       run: |
-        pipenv run pyinstaller main.py
+        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data assets/README.txt:.
     - name: Archive Package
       uses: thedoctor0/zip-release@0.7.1
       with:
@@ -48,6 +46,5 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: 'dist/main.zip'
         asset_name: ${{ matrix.asset_name }}
-#        tag: ${{ github.ref }}
-        tag: release-test
+        tag: ${{ github.ref }}
         overwrite: true

@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            asset_name: 'nyt-crossword-downloader-mac.zip'
+          - os: windows-latest
+            asset_name: 'nyt-crossword-downloader-win.zip'
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+    - name: Install pipenv
+      run: |
+        python -m pip install --upgrade pipenv wheel
+    - name: Install Dependencies
+      run: |
+        pipenv install --deploy --dev     
+    - name: Create Install Package
+      run: |
+        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data assets/README.txt:.
+    - name: Archive Package
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        type: 'zip'
+        directory: 'dist'
+        path: 'main'
+        filename: 'main.zip'
+    - name: Upload Binaries to GitHub Release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: 'dist/main.zip'
+        asset_name: ${{ matrix.asset_name }}
+        tag: ${{ github.ref }}
+        overwrite: true

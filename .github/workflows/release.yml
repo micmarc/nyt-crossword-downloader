@@ -38,13 +38,13 @@ jobs:
       with:
         type: 'zip'
         directory: 'dist'
-        path: 'main'
-        filename: 'main.zip'
+        path: 'nyt-crossword-downloader'
+        filename: 'nyt-crossword-downloader.zip'
     - name: Upload Binaries to GitHub Release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: 'dist/main.zip'
+        file: 'dist/nyt-crossword-downloader.zip'
         asset_name: ${{ matrix.asset_name }}
         tag: ${{ github.ref }}
         overwrite: true

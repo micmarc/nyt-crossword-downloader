@@ -9,6 +9,7 @@ filedate = "*"
 
 [dev-packages]
 pyinstaller = "*"
+pywin32-ctypes = "*"
 
 [requires]
 python_version = "3.9"

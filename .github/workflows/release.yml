@@ -1,11 +1,9 @@
 name: Release
 
 on:
-  pull_request:
-    branches: [ main ]
-#  push:
-#    tags:
-#      - '*'
+  push:
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -54,6 +52,5 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: 'dist/nyt-crossword-downloader.zip'
         asset_name: ${{ matrix.asset_name }}
-#        tag: ${{ github.ref }}
-        tag: '1.0.0-alpha2'
+        tag: ${{ github.ref }}
         overwrite: true

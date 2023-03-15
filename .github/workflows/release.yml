@@ -1,15 +1,18 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - '*'
+  pull_request:
+    branches: [ main ]
+#  push:
+#    tags:
+#      - '*'
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
@@ -32,7 +35,7 @@ jobs:
         pipenv install --deploy --dev     
     - name: Create Install Package
       run: |
-        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data assets/README.txt:.
+        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data assets/README.txt:. --target-arch universal2
     - name: Archive Package
       uses: thedoctor0/zip-release@0.7.1
       with:
@@ -46,5 +49,6 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: 'dist/nyt-crossword-downloader.zip'
         asset_name: ${{ matrix.asset_name }}
-        tag: ${{ github.ref }}
+#        tag: ${{ github.ref }}
+        tag: '1.0.0-alpha2'
         overwrite: true

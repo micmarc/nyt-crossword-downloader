@@ -40,7 +40,7 @@ jobs:
     - name: Create Windows Install Package
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
-        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data 'assets\README.txt:.'
+        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data 'assets\README.txt;.'
     - name: Archive Package
       uses: thedoctor0/zip-release@0.7.1
       with:

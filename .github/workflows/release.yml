@@ -36,7 +36,7 @@ jobs:
     - name: Create macOS Install Package
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
-        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data 'assets/README.txt:.' --target-arch universal2
+        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data 'assets/README.txt:.'
     - name: Create Windows Install Package
       if: ${{ matrix.os == 'windows-latest' }}
       run: |

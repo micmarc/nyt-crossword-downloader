@@ -33,9 +33,14 @@ jobs:
     - name: Install Dependencies
       run: |
         pipenv install --deploy --dev     
-    - name: Create Install Package
+    - name: Create macOS Install Package
+      if: ${matrix.os == 'macos-latest'}
       run: |
-        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data assets/README.txt:. --target-arch universal2
+        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data 'assets/README.txt:.' --target-arch universal2
+    - name: Create Windows Install Package
+      if: ${matrix.os == 'windows-latest'}
+      run: |
+        pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data 'assets\README.txt:.'
     - name: Archive Package
       uses: thedoctor0/zip-release@0.7.1
       with:

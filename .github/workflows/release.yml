@@ -34,11 +34,11 @@ jobs:
       run: |
         pipenv install --deploy --dev     
     - name: Create macOS Install Package
-      if: ${matrix.os == 'macos-latest'}
+      if: ${{ matrix.os == 'macos-latest' }}
       run: |
         pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data 'assets/README.txt:.' --target-arch universal2
     - name: Create Windows Install Package
-      if: ${matrix.os == 'windows-latest'}
+      if: ${{ matrix.os == 'windows-latest' }}
       run: |
         pipenv run pyinstaller main.py -n nyt-crossword-downloader --add-data 'assets\README.txt:.'
     - name: Archive Package
